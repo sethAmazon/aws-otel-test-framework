@@ -1,6 +1,7 @@
 FROM gradle:6.8.3 as build
 
 WORKDIR /app
+ARG GOPROXY=direct
 COPY ./build.gradle ./build.gradle
 COPY ./src ./src
 COPY ./settings.gradle ./settings.gradle

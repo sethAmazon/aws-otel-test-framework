@@ -1,6 +1,7 @@
 FROM node:14
 
 WORKDIR /app
+ARG GOPROXY=direct
 
 COPY certificates ./certificates
 COPY *.js ./

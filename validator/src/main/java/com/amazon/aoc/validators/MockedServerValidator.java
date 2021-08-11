@@ -12,6 +12,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import java.nio.charset.StandardCharsets;
+
 @Log4j2
 public class MockedServerValidator implements IValidator {
   String mockedServerValidatingUrl;
@@ -50,6 +52,10 @@ public class MockedServerValidator implements IValidator {
             throw new BaseException(ExceptionCode.MOCKED_SERVER_NOT_AVAILABLE);
           }
 
+          log.info("Response : {}", response);
+          log.info("Response body : {}", response.body().bytes());
+          log.info("Reponse body string : {}",
+                  new String(response.body().bytes(), StandardCharsets.UTF_8));
           String responseBody = response.body().string();
           if (!responseBody.equalsIgnoreCase("success")) {
             throw new BaseException(ExceptionCode.MOCKED_SERVER_NOT_RECEIVE_DATA);
