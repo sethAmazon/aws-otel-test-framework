@@ -1,0 +1,49 @@
+version: "3.8"
+services:
+  mocked-server:
+    build:
+      context: ../../mocked_servers/https
+    ports:
+      - 80:8080
+      - 55671:55671
+
+  aws-ot-collector:
+    build:
+      context: ../../../aws-otel-collector
+      dockerfile: cmd/awscollector/Dockerfile
+
+    command: ["--config=/tmp/otconfig.yaml", "--log-level=DEBUG"]
+    volumes:
+      - ./otconfig.yml:/tmp/otconfig.yaml
+      - "../../mocked_servers/https/certificates/ssl/certificate.crt:/etc/ssl/certs/ca-certificates.crt"
+      - "../../mocked_servers/https/certificates/ssl/certificate.crt:/etc/ssl/cert.pem"
+      - "../../mocked_servers/https/certificates/ssl/certificate.crt:/etc/pki/tls/certs/ca-bundle.crt"
+      - "../../mocked_servers/https/certificates/ssl/certificate.crt:/etc/ssl/ca-bundle.pem"
+      - "../../mocked_servers/https/certificates/ssl/certificate.crt:/etc/pki/tls/cacert.pem"
+      - "../../mocked_servers/https/certificates/ssl/certificate.crt:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+    environment:
+      - AWS_REGION=us-west-2
+      # faked credentials
+      - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+      - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      - GODEBUG=x509ignoreCN=0
+    depends_on:
+      - mocked-server
+
+  sample_app:
+    build:
+      context: ../../sample-apps/spark
+    ports:
+      - "4567:4567"
+    environment:
+      - LISTEN_ADDRESS=0.0.0.0:4567
+      - AWS_REGION=us-west-2
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=aws-otel,service.name=aws-otel-integ-test
+      - INSTANCE_ID=2e94f596de3e0f09
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://aws-ot-collector:4317
+      - AWS_XRAY_DAEMON_ADDRESS=aws-ot-collector:55690
+      - COLLECTOR_UDP_ADDRESS=aws-ot-collector:55690
+      - ZIPKIN_RECEIVER_ENDPOINT=aws-ot-collector:9411
+      - JAEGER_RECEIVER_ENDPOINT=aws-ot-collector:9411
+    depends_on:
+      - aws-ot-collector

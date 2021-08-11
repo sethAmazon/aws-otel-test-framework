@@ -1,0 +1,25 @@
+extensions:
+  pprof:
+    endpoint: 0.0.0.0:1777
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+
+exporters:
+  logging:
+    loglevel: debug
+  awsemf:
+    region: 'us-west-2'
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging, awsemf]
+  extensions: [pprof]
