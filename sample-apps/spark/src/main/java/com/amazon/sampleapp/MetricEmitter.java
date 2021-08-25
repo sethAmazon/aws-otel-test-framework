@@ -55,8 +55,6 @@ public class MetricEmitter {
   String apiNameValue = "";
   String statusCodeValue = "";
 
-  String latencyMetricName;
-
   public MetricEmitter() {
     Meter meter = GlobalMeterProvider.getMeter("aws-otel", "1.0");
 
@@ -65,7 +63,7 @@ public class MetricEmitter {
 
     System.out.println("OTLP port is: " + System.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"));
 
-    latencyMetricName = API_LATENCY_METRIC;
+    String latencyMetricName = API_LATENCY_METRIC;
     String apiBytesSentMetricName = API_COUNTER_METRIC;
     String totalApiBytesSentMetricName = API_SUM_METRIC;
     String lastLatencyMetricName = API_LAST_LATENCY_METRIC;
@@ -184,7 +182,7 @@ public class MetricEmitter {
    */
   public void emitReturnTimeMetric(Long returnTime, String apiName, String statusCode) {
     System.out.println(
-        "emit metric with return time " + returnTime + "," + apiName + "," + statusCode + "," + latencyMetricName);
+        "emit metric with return time " + returnTime + "," + apiName + "," + statusCode);
     apiLatencyRecorder.record(
         returnTime, Labels.of(DIMENSION_API_NAME, apiName, DIMENSION_STATUS_CODE, statusCode));
   }
