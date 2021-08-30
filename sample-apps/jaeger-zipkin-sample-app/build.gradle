@@ -45,7 +45,7 @@ dependencies {
     // the workaround is build fat jar and copy it in Dockerfile for building docker image
     //  implementation files('build/libs/trace-java-client-1.0-all.jar')
 
-    implementation project(":trace-java-client")
+    implementation files('build/libs/trace-java-client-1.0-all.jar')
 
 
     testImplementation group: 'junit', name: 'junit', version: '4.12'
