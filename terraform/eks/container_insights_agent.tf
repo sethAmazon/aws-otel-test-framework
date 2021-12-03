@@ -76,7 +76,8 @@ resource "kubectl_manifest" "aoc_service_deploy" {
 
 resource "kubectl_manifest" "aoc_fargate_deploy" {
   count     = var.aoc_base_scenario == "infra" && var.deployment_type == "fargate" ? 1 : 0
-  yaml_body = file("./container-insights-agent/stateful_set_fargate.yml")
+  yaml_body = templatefile("./container-insights-agent/stateful_set_fargate.tpl",
+  {ClusterName: var.eks_cluster_name, AocRepo: var.aoc_image_repo, AocTag: var.aoc_version})
   depends_on = [
     kubectl_manifest.aoc_service_deploy
   ]

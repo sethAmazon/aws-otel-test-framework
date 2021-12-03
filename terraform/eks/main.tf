@@ -106,9 +106,7 @@ resource "kubernetes_service_account" "aoc-role" {
   metadata {
     name      = "aoc-role-${module.common.testing_id}"
     namespace = var.deployment_type == "fargate" ? "default" : kubernetes_namespace.aoc_ns.metadata[0].name
-    annotations = {
-      "eks.amazonaws.com/role-arn" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ServiceAccount-eks-test-aoc-role"
-    }
+
   }
 
   automount_service_account_token = true
@@ -158,7 +156,7 @@ module "validator" {
   region                       = var.region
   testing_id                   = module.common.testing_id
   metric_namespace             = "${module.common.otel_service_namespace}/${module.common.otel_service_name}"
-  sample_app_endpoint          = length(kubernetes_ingress.app) > 0 && var.deployment_type == "fargate" ? "http://${kubernetes_ingress.app.0.load_balancer_ingress.0.hostname}:80" : length(kubernetes_ingress.app) > 0 ? "http://${kubernetes_service.sample_app_service.0.load_balancer_ingress.0.hostname}:${module.common.sample_app_lb_port}" : ""
+  sample_app_endpoint          = length(kubernetes_ingress.app) > 0 && var.deployment_type == "fargate" ? "http://${kubernetes_ingress.app.0.load_balancer_ingress.0.hostname}:80" : length(kubernetes_service.sample_app_service) > 0 ? "http://${kubernetes_service.sample_app_service.0.load_balancer_ingress.0.hostname}:${module.common.sample_app_lb_port}" : ""
   mocked_server_validating_url = length(kubernetes_service.mocked_server_service) > 0 ? "http://${kubernetes_service.mocked_server_service.0.load_balancer_ingress.0.hostname}/check-data" : ""
   cloudwatch_context_json = var.aoc_base_scenario == "prometheus" ? jsonencode({
     clusterName : var.eks_cluster_name

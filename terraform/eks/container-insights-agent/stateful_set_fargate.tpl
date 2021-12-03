@@ -22,7 +22,7 @@ spec:
       securityContext:
         fsGroup: 65534
       containers:
-        - image: public.ecr.aws/aws-observability/aws-otel-collector:latest
+        - image: ${AocRepo}:${AocTag}
           name: adot-collector
           imagePullPolicy: Always
           command:
@@ -30,7 +30,7 @@ spec:
             - "--config=/conf/adot-collector-config.yaml"
           env:
             - name: OTEL_RESOURCE_ATTRIBUTES
-              value: "ClusterName=Fargate-Integ-Test-Cluster"
+              value: "ClusterName=${ClusterName}"
           resources:
             limits:
               cpu: 2
